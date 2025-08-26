@@ -1,106 +1,42 @@
 ---
 version: "2.0"
-
 services:
-  game-server:
-    image: your-dockerhub-username/colyseus-unity-server:latest
+  colyseus:
+    image: docker.io/fenildocker/olyseus-server-unity-akash:latest
     expose:
-      - port: 80
-        as: 80
-        to:
-          - global: true
       - port: 2567
         as: 2567
         to:
           - global: true
     env:
       - NODE_ENV=production
-      - PORT=80
+      - PORT=2567
       - WS_PORT=2567
-      - JWT_SECRET=your-super-secret-jwt-key-change-this-to-32-chars-min
-      - AUTH_SALT=your-random-salt-for-password-hashing
-      - SESSION_SECRET=another-secret-for-session-management
-      - COLYSEUS_MONITOR_PASSWORD=secure-admin-password-123
+      - JWT_SECRET=change_me_secure_value
+      - AUTH_SALT=change_me_secure_value
+      - SESSION_SECRET=change_me_secure_value
+      - COLYSEUS_MONITOR_PASSWORD=change_me_monitor_password
       - LOG_LEVEL=info
-      - MAX_ROOMS=100
-      - ROOM_TIMEOUT=300
-      - PLAYER_TIMEOUT=60
-
 profiles:
   compute:
-    # Small scale: 1-50 players
-    small:
+    colyseus:
       resources:
         cpu:
           units: 0.5
         memory:
           size: 512Mi
         storage:
-          size: 1Gi
-    
-    # Medium scale: 50-200 players  
-    medium:
-      resources:
-        cpu:
-          units: 1.0
-        memory:
-          size: 1Gi
-        storage:
-          size: 2Gi
-    
-    # Large scale: 200-500 players
-    large:
-      resources:
-        cpu:
-          units: 2.0
-        memory:
-          size: 2Gi
-        storage:
-          size: 5Gi
-    
-    # Enterprise scale: 500+ players
-    enterprise:
-      resources:
-        cpu:
-          units: 4.0
-        memory:
-          size: 4Gi
-        storage:
-          size: 10Gi
-
+          - size: 1Gi
   placement:
-    akash:
+    dcloud:
+      pricing:
+        colyseus:
+          denom: ibc/170C677610AC31DF0904FFE09CD3B5C657492170E7E52372E48756B71E56F2F1
+          amount: 100000
       attributes:
         host: akash
-      signedBy:
-        anyOf:
-          - "akash1365yvmc4s7awdyj3n2sav7xfx76adc6dnmlx63"
-          - "akash18qa2a2ltfyvkyj0ggj3hkvuj6twzyumuaru9s4"
-      pricing:
-        # Adjust pricing based on your scale
-        small:
-          denom: uakt
-          amount: 50    # ~$2-5/month
-        medium:
-          denom: uakt
-          amount: 100   # ~$8-15/month
-        large:
-          denom: uakt
-          amount: 200   # ~$20-35/month
-        enterprise:
-          denom: uakt
-          amount: 400   # ~$50-80/month
-
 deployment:
-  game-server:
-    akash:
-      # Change this to match your desired scale:
-      # small, medium, large, or enterprise
-      profile: medium
+  colyseus:
+    dcloud:
+      profile: colyseus
       count: 1
-
-# Instructions:
-# 1. Replace "your-dockerhub-username" with your actual Docker Hub username
-# 2. Change all default passwords and secrets
-# 3. Choose your scale by changing "profile: medium" to small/large/enterprise
-# 4. Deploy with: akash tx deployment create deploy.yml --from $AKASH_KEYNAME --node $AKASH_NODE --chain-id $AKASH_CHAIN_ID -y

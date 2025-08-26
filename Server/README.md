@@ -74,7 +74,7 @@ This Colyseus game server is pre-configured for Akash Network deployment with op
    Once deployed, you'll receive:
    ```
    WebSocket: ws://your-provider-url:2567  # For Unity clients
-   HTTP: http://your-provider-url:2567       # For monitoring
+   HTTP: http://your-provider-url:80       # For monitoring
    ```
 
 **Your server is now live and ready for Unity clients!**
@@ -217,7 +217,7 @@ docker-compose down
 ```bash
 # === SERVER CONFIGURATION ===
 NODE_ENV=production
-PORT=2567                  # HTTP port (same as WebSocket for Colyseus)
+PORT=80                    # HTTP port for Akash
 WS_PORT=2567              # WebSocket port for game clients
 
 # === SECURITY (CHANGE THESE!) ===
@@ -255,10 +255,10 @@ ColyseusClient client = new ColyseusClient("ws://your-akash-provider.com:2567");
 **Monitoring & Health:**
 ```bash
 # Health check endpoint
-http://your-akash-provider.com:2567/health
+http://your-akash-provider.com:80/health
 
 # Admin monitoring panel (if enabled)
-http://your-akash-provider.com:2567/colyseus
+http://your-akash-provider.com:80/colyseus
 ```
 
 ---
@@ -270,7 +270,7 @@ http://your-akash-provider.com:2567/colyseus
 **Check Server Status:**
 ```bash
 # Quick health check
-curl http://your-akash-provider.com:2567/health
+curl http://your-akash-provider.com:80/health
 
 # Expected response:
 {
@@ -320,10 +320,10 @@ akash provider lease-logs \
 **Monitoring Commands:**
 ```bash
 # Real-time logs
-curl -s http://your-akash-provider.com:2567/health | jq
+curl -s http://your-akash-provider.com:80/health | jq
 
 # Monitor specific metrics
-watch -n 5 'curl -s http://your-akash-provider.com:2567/health | jq ".rooms, .players"'
+watch -n 5 'curl -s http://your-akash-provider.com:80/health | jq ".rooms, .players"'
 ```
 
 ---
@@ -732,9 +732,6 @@ public class OptimizedAkashClient : MonoBehaviour
 }
 ```
 
----
-
-
 
 ## 🚀 Production Deployment Best Practices
 
@@ -931,7 +928,7 @@ echo "Testing Akash deployment..."
 
 # Test health endpoint
 echo "1. Health Check:"
-curl -f http://$SERVER_URL:2567/health || exit 1
+curl -f http://$SERVER_URL:80/health || exit 1
 
 # Test WebSocket connection
 echo "2. WebSocket Test:"
@@ -983,29 +980,3 @@ echo "✅ All tests passed! Your server is ready for players!"
 - **Akash Network:** $3-60/month
 - **Savings:** Up to 90% cost reduction!
 
----
-
-## 🏆 Success Stories
-
-> *"We deployed our Unity battle royale game on Akash and saved $2,000/month compared to AWS. The global distribution is amazing!"*
-> — IndieDev Studio
-
-> *"Akash Network made it possible for us to launch our multiplayer game with minimal upfront costs. We're scaling as we grow!"*
-> — Blockchain Gaming Startup
-
----
-
-## 📜 License
-
-MIT License - Build amazing games and deploy them anywhere!
-
----
-
-**🚀 Ready to deploy? Your players are waiting!**
-
-```bash
-# One command to rule them all
-akash tx deployment create deploy.yml --from $AKASH_KEYNAME --node $AKASH_NODE --chain-id $AKASH_CHAIN_ID -y
-```
-
-**Questions? Join our [Discord](https://discord.akash.network) and tag @devrel for instant help!**
