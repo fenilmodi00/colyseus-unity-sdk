@@ -8,6 +8,8 @@ Server/build
 .vs/
 .vsconfig
 .idea/
+.qoder
+
 
 #Mono Project Files
 *.pidb

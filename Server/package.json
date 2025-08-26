@@ -6,11 +6,15 @@
   "main": "lib/index.js",
   "scripts": {
     "start": "tsx watch src/index.ts",
+    "start:prod": "node build/index.js",
     "tsx": "tsx watch src/index.ts",
     "loadtest": "tsx loadtest/example.ts --room my_room --numClients 99",
     "build": "tsc",
+    "build:prod": "tsc --sourceMap false",
     "test": "mocha -r tsx ts-node/register test/**_test.ts --exit --timeout 15000",
-    "schema-codegen": "schema-codegen src/rooms/schema/* --csharp --output ../Assets/Example/"
+    "schema-codegen": "schema-codegen src/rooms/schema/* --csharp --output ../Assets/Example/",
+    "health-check": "curl -f http://localhost:2567/health || exit 1",
+    "version": "echo $npm_package_version"
   },
   "author": "",
   "license": "UNLICENSED",

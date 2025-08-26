@@ -1,0 +1,18 @@
+# Colyseus Unity SDK Server - Docker Compose
+
+services:
+  colyseus-server:
+    build: .
+    container_name: colyseus-server
+    ports:
+      - "2567:2567" # WebSocket and HTTP
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2567/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -1,4 +1,4 @@
-import { MapSchema, Schema, Context, type } from "@colyseus/schema";
+import { MapSchema, Schema, type } from "@colyseus/schema";
 
 export class Player extends Schema {
 
