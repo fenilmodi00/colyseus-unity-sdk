@@ -47,7 +47,7 @@ This Colyseus game server is pre-configured for Akash Network deployment with op
    Edit the [`deploy.yml`](./deploy.yml) file:
    ```bash
    # Update the Docker image with your repository
-   image: your-dockerhub-username/colyseus-unity-server:latest
+   image: fenildocker/colyseus-unity-server:latest
 
    # Choose your scaling profile:
    profile: medium  # Options: small, medium, large, enterprise
@@ -74,7 +74,7 @@ This Colyseus game server is pre-configured for Akash Network deployment with op
    Once deployed, you'll receive:
    ```
    WebSocket: ws://your-provider-url:2567  # For Unity clients
-   HTTP: http://your-provider-url:80       # For monitoring
+   HTTP: http://your-provider-url:2567       # For monitoring
    ```
 
 **Your server is now live and ready for Unity clients!**
@@ -175,7 +175,7 @@ profile: medium  # Change to: small, large, or enterprise
 
 ```bash
 # Clone and setup
-git clone <your-repo>
+git clone https://github.com/fenilmodi00/colyseus-unity-sdk
 cd Server
 npm install
 
@@ -217,7 +217,7 @@ docker-compose down
 ```bash
 # === SERVER CONFIGURATION ===
 NODE_ENV=production
-PORT=80                    # HTTP port for Akash
+PORT=2567                  # HTTP port (same as WebSocket for Colyseus)
 WS_PORT=2567              # WebSocket port for game clients
 
 # === SECURITY (CHANGE THESE!) ===
@@ -255,10 +255,10 @@ ColyseusClient client = new ColyseusClient("ws://your-akash-provider.com:2567");
 **Monitoring & Health:**
 ```bash
 # Health check endpoint
-http://your-akash-provider.com:80/health
+http://your-akash-provider.com:2567/health
 
 # Admin monitoring panel (if enabled)
-http://your-akash-provider.com:80/colyseus
+http://your-akash-provider.com:2567/colyseus
 ```
 
 ---
@@ -270,7 +270,7 @@ http://your-akash-provider.com:80/colyseus
 **Check Server Status:**
 ```bash
 # Quick health check
-curl http://your-akash-provider.com:80/health
+curl http://your-akash-provider.com:2567/health
 
 # Expected response:
 {
@@ -320,10 +320,10 @@ akash provider lease-logs \
 **Monitoring Commands:**
 ```bash
 # Real-time logs
-curl -s http://your-akash-provider.com:80/health | jq
+curl -s http://your-akash-provider.com:2567/health | jq
 
 # Monitor specific metrics
-watch -n 5 'curl -s http://your-akash-provider.com:80/health | jq ".rooms, .players"'
+watch -n 5 'curl -s http://your-akash-provider.com:2567/health | jq ".rooms, .players"'
 ```
 
 ---
@@ -734,108 +734,7 @@ public class OptimizedAkashClient : MonoBehaviour
 
 ---
 
-## 🔧 Troubleshooting
 
-### Common Akash Deployment Issues
-
-**1. Deployment Stuck in "Pending"**
-```bash
-# Check if you have enough AKT tokens
-akash query bank balances $(akash keys show $AKASH_KEYNAME -a) --node $AKASH_NODE
-
-# Check deployment status
-akash query deployment list --owner $(akash keys show $AKASH_KEYNAME -a) --node $AKASH_NODE
-
-# If no bids, try increasing your price in deploy.yml
-# Change: amount: 100  to  amount: 200
-```
-
-**2. Can't Connect to WebSocket**
-```bash
-# Test WebSocket connectivity
-wscat -c ws://your-akash-provider.com:2567
-
-# If connection fails, check:
-# 1. Is the deployment running?
-akash provider lease-status --from $AKASH_KEYNAME --provider $AKASH_PROVIDER
-
-# 2. Are ports correctly exposed in deploy.yml?
-# Ensure both ports 80 and 2567 are in your SDL
-```
-
-**3. Server Keeps Restarting**
-```bash
-# Check server logs
-akash provider lease-logs --from $AKASH_KEYNAME --provider $AKASH_PROVIDER
-
-# Common causes:
-# - Not enough memory (increase memory in deploy.yml)
-# - Missing environment variables
-# - Docker image not found
-```
-
-**4. High Latency Issues**
-```bash
-# Test latency to your provider
-ping your-akash-provider.com
-
-# Choose a provider closer to your players:
-# 1. Close current lease
-akash tx market lease close --from $AKASH_KEYNAME --provider $AKASH_PROVIDER
-
-# 2. Redeploy and choose a different provider
-```
-
-### Performance Troubleshooting
-
-**Memory Issues:**
-```bash
-# Monitor memory usage
-curl -s http://your-akash-provider.com:80/health | jq '.memory'
-
-# If memory usage > 85%, scale up:
-# In deploy.yml, increase memory:
-memory:
-  size: 2Gi  # Increase from 1Gi
-```
-
-**CPU Issues:**
-```bash
-# Monitor CPU usage
-curl -s http://your-akash-provider.com:80/health | jq '.cpu'
-
-# If CPU usage > 80%, scale up:
-# In deploy.yml, increase CPU:
-cpu:
-  units: 2.0  # Increase from 1.0
-```
-
-**Network Issues:**
-```bash
-# Test from different locations
-curl -w "@curl-format.txt" -o /dev/null -s http://your-akash-provider.com:80/health
-
-# Create curl-format.txt:
-echo "time_total: %{time_total}\ntime_connect: %{time_connect}\ntime_starttransfer: %{time_starttransfer}" > curl-format.txt
-```
-
-### Unity Client Issues
-
-**Connection Timeouts:**
-```csharp
-// Increase timeout in Unity
-client.Settings.connectionTimeout = 10000; // 10 seconds
-```
-
-**Frequent Disconnections:**
-```csharp
-// Implement heartbeat
-room.OnMessage<string>("ping", (message) => {
-    room.Send("pong");
-});
-```
-
----
 
 ## 🚀 Production Deployment Best Practices
 
@@ -1032,7 +931,7 @@ echo "Testing Akash deployment..."
 
 # Test health endpoint
 echo "1. Health Check:"
-curl -f http://$SERVER_URL:80/health || exit 1
+curl -f http://$SERVER_URL:2567/health || exit 1
 
 # Test WebSocket connection
 echo "2. WebSocket Test:"
