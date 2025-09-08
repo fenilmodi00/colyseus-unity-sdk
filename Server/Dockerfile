@@ -1,6 +1,6 @@
 # =============================================================================
 # Multi-stage Dockerfile for Colyseus Unity SDK Server
-# Optimized for minimal size while maintaining full functionality
+# Optimized for Akash Network deployment with minimal size and enhanced security
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -37,14 +37,13 @@ RUN mkdir /prod && cd /prod && \
 # -----------------------------------------------------------------------------
 FROM node:20-alpine AS production
 
-# Install only essential runtime dependencies
+# Install only essential runtime dependencies for Akash deployment
 RUN apk add --no-cache \
     tini \
-    curl && \
-    rm -rf /var/cache/apk/*
-
-# Create non-root user
-RUN adduser -D -s /bin/sh -h /app colyseus
+    curl \
+    ca-certificates && \
+    rm -rf /var/cache/apk/* && \
+    adduser -D -s /bin/sh -h /app colyseus
 
 # Set working directory
 WORKDIR /app
@@ -64,12 +63,12 @@ RUN mkdir -p logs && \
 # Switch to non-root user
 USER colyseus
 
-# Expose port
-EXPOSE 2567
+# Expose ports for Akash Network
+EXPOSE 80 2567
 
-# Health check
+# Health check - optimized for Akash Network container orchestration
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD curl -f http://localhost:2567/health || exit 1
+    CMD curl -f http://localhost:80/health || exit 1
 
 # Use tini for proper signal handling
 ENTRYPOINT ["tini", "--"]
