@@ -19,27 +19,143 @@
 </div>
 
 
-## Colyseus SDK Development
+## Quick Start Guide
 
-Support major platforms, including:
+## 🎯 What This Repository Provides
 
-- WebGL
-- iOS
-- Android
-- Mac
-- Windows
+- **Colyseus Unity SDK** - Complete multiplayer client for Unity
+- **Example Server** - Ready-to-deploy multiplayer server with Docker support
+- **Unity Example Project** - Functional demo with connection UI and player movement
+- **Akash Network Integration** - Decentralized hosting deployment ready
 
-### Unit tests
+## ⚡ Quick Local Testing (5 minutes)
 
-Open Window → General → Test Runner.
+### Step 1: Start the Server
+```bash
+# Navigate to the server directory
+cd Server
 
-### Releasing a new version
+# Install dependencies (first time only)
+npm install
 
-Update the version number under `Assets/Colyseus/package.json` and push to `master` branch.
+# Start the server
+npm run start
+```
 
-### Updating Asset Store Documentation
+Server will start on:
+- **WebSocket**: `ws://localhost:2567` (for Unity connections)
+- **Health Check**: `http://localhost:2567/health`
+- **Monitor**: `http://localhost:2567/colyseus`
 
-Markdown files can be converted into PDF any number of ways, most recently used was [Markdown to PDF](https://www.markdowntopdf.com/). The goal for this is specifically to appease the Unity team's approval process. The documentation was a lightly edited version of our [Getting Started - Unity3D](https://github.com/colyseus/docs/blob/master/docs/getting-started/unity3d-client.md) documentation, with hyperlinks fixed and an additional "go to the docs page" link added to the top of the file. Both the PDF and the MD files should be placed under `Assets/Colyseus/Documentation~/`
+### Step 2: Test Unity Connection
+
+1. **Open Unity Project**
+   - Open this folder in Unity 6 (or Unity 2022.3+)
+   - Unity will import the project automatically
+
+2. **Load the Menu Scene**
+   - In Project window: `Assets → Colyseus → Runtime → Examples → Scenes → Menu`
+   - Double-click `Menu.unity` to load it
+
+3. **Test Connection**
+   - Click Play button in Unity
+   - Menu scene should show connection UI
+   - Default settings: `localhost:2567`
+   - Click "Connect" or "Play" to test
+
+4. **Verify Connection**
+   - Check Unity Console for connection logs
+   - Server terminal should show "Client connected"
+   - Monitor interface: `http://localhost:2567/colyseus`
+
+## 🐳 Docker Testing
+
+```bash
+# Build and run with Docker
+cd Server
+docker-compose up --build
+
+# Test connection
+curl http://localhost:2567/health
+```
+
+## 🌐 Deploy to Akash Network
+
+See [Server/README.md](Server/README.md) for detailed Akash deployment instructions.
+
+## 📁 Project Structure
+
+```
+├── Assets/Colyseus/          # Unity SDK
+│   ├── Runtime/
+│   │   ├── Examples/          # Demo scenes and scripts
+│   │   │   ├── Scenes/        # Menu.unity, Game.unity
+│   │   │   └── Scripts/       # Connection scripts
+│   │   └── Colyseus/          # Core SDK
+├── Server/                    # Multiplayer server
+│   ├── src/                   # Server source code
+│   ├── Dockerfile             # Container config
+│   └── README.md              # Deployment guide
+```
+
+## 🛠️ Integration into Your Project
+
+### Option 1: Copy SDK Folder
+```bash
+# Copy the SDK into your Unity project
+cp -r Assets/Colyseus /path/to/your/project/Assets/
+```
+
+### Option 2: Unity Package Manager
+1. Copy the `package.json` from `Assets/Colyseus/`
+2. Add via Package Manager → Add package from disk
+3. Select the `package.json` file
+
+### Basic Usage
+```csharp
+using Colyseus;
+
+// Connect to server
+ColyseusClient client = new ColyseusClient("ws://localhost:2567");
+ColyseusRoom room = await client.JoinOrCreate("my_room");
+
+// Send message
+room.Send("playerMove", new { x = 10, y = 5 });
+```
+
+## 🔧 Troubleshooting
+
+### "Connection Failed"
+- ✅ Ensure server is running: `npm run start` in Server folder
+- ✅ Check server logs for errors
+- ✅ Verify Unity uses correct address: `localhost:2567`
+- ✅ Test health endpoint: `curl http://localhost:2567/health`
+
+### "Scene Only Shows Camera"
+- ✅ Load correct scene: `Assets/Colyseus/Runtime/Examples/Scenes/Menu.unity`
+- ✅ Click Play button in Unity Editor
+- ✅ Check Unity Console for script errors
+
+### "Endpoints Not Working"
+- ✅ All endpoints use port 2567 (NOT port 80)
+- ✅ Health: `http://localhost:2567/health`
+- ✅ Monitor: `http://localhost:2567/colyseus`
+- ✅ Server info: `http://localhost:2567/`
+
+## 📖 Documentation
+
+- [Server Deployment Guide](Server/README.md)
+- [Unity Integration Guide](Assets/Colyseus/Documentation~/GettingStarted.md)
+- [Official Colyseus Docs](https://docs.colyseus.io/)
+
+## 🎮 Platform Support
+
+- ✅ WebGL
+- ✅ iOS  
+- ✅ Android
+- ✅ macOS
+- ✅ Windows
+- ✅ Linux
 
 ## License
 

@@ -54,8 +54,8 @@ npm run build
 ```
 
 The server will start on:
-- **WebSocket:** ws://localhost:2567 (for Unity clients)
-- **HTTP:** http://localhost:2567 (for health checks)
+- **WebSocket & HTTP:** port 2567 (this is the only port you need)
+- **Health checks:** http://localhost:2567/health
 
 ### Using Docker
 
@@ -74,77 +74,265 @@ docker-compose down
 ```
 ## Unity Client Connection
 
-### Basic Connection
+### Installing the SDK in Your Project
 
+### Using the Included Example Project
+
+This repository includes a complete Unity example project with scenes and scripts ready to test:
+
+**1. Open the Project**
+```bash
+# Clone the repository
+git clone https://github.com/fenilmodi00/colyseus-unity-sdk.git
+
+# Open in Unity 6+ (or Unity 2022.3+)
+# File > Open Project > Select colyseus-unity-sdk folder
+```
+
+**2. Load the Menu Scene**
+- Navigate to: `Assets > Colyseus > Runtime > Examples > Scenes`
+- Double-click `Menu.unity` to load it
+- Click Play button in Unity Editor
+
+**3. Test Connection**
+- Menu scene provides connection UI
+- Default settings: `localhost:2567`
+- Start the server first (see above), then test in Unity
+- Check Unity Console for connection logs
+
+**4. Example Scripts Included**
+- `MenuManager.cs` - Connection UI and settings
+- `NetworkManager.cs` - Colyseus client management  
+- `GameplayManager.cs` - Game scene management
+- `PlayerMovement.cs` - Synchronized player movement
+- `MyRoomState.cs` & `Player.cs` - State schemas
+
+### Installing the SDK in Your Project
+
+**Option 1: Direct Copy (Recommended)**
+```bash
+# Clone this repository
+git clone https://github.com/fenilmodi00/colyseus-unity-sdk.git
+
+# Copy the SDK into your Unity project
+cp -r colyseus-unity-sdk/Assets/Colyseus /path/to/your-unity-project/Assets/
+```
+
+**Option 2: Unity Package Manager**
+1. In Unity: Go to `Window > Package Manager`
+2. Click "+" button → "Add package from git URL"
+3. Enter: `https://github.com/fenilmodi00/colyseus-unity-sdk.git`
+4. Click "ADD"
+
+### Quick Setup
+
+**1. Basic Connection Script**
 ```csharp
 using Colyseus;
 using UnityEngine;
 
-public class NetworkManager : MonoBehaviour
+public class GameNetworkManager : MonoBehaviour
 {
     private ColyseusClient client;
     private ColyseusRoom<MyRoomState> room;
 
-    void Start()
+    async void Start()
     {
-        // Connect to your server
+        // Connect to your server (change URL for production)
         client = new ColyseusClient("ws://localhost:2567");
-        ConnectToRoom();
-    }
-
-    async void ConnectToRoom()
-    {
-        try
+        
+        try 
         {
+            // Join or create a room
             room = await client.JoinOrCreate<MyRoomState>("my_room");
             Debug.Log("Connected to room: " + room.Id);
-
-            // Setup event listeners
-            room.OnJoin += () => Debug.Log("Joined room!");
-            room.OnLeave += (code) => Debug.Log("Left room: " + code);
+            
+            SetupRoomEvents();
         }
         catch (System.Exception e)
         {
             Debug.LogError("Connection failed: " + e.Message);
         }
     }
-
-    public void SendMessage(string type, object data)
+    
+    void SetupRoomEvents()
     {
-        room?.Send(type, data);
+        // Room joined successfully
+        room.OnJoin += () => {
+            Debug.Log("Successfully joined room!");
+        };
+        
+        // Room left
+        room.OnLeave += (code) => {
+            Debug.Log($"Left room with code: {code}");
+        };
+        
+        // State changed
+        room.OnStateChange += (state, isFirstState) => {
+            if (isFirstState) {
+                Debug.Log("Initial room state received");
+            }
+        };
+        
+        // Listen for custom messages
+        room.OnMessage<object>("welcomeMessage", (message) => {
+            Debug.Log("Server says: " + message);
+        });
+    }
+    
+    public void SendPlayerPosition(Vector2 position)
+    {
+        room?.Send("position", new { x = position.x, y = position.y });
     }
 }
 ```
 
-### Connection Settings
+**2. Room State Schema**
+```csharp
+using Colyseus.Schema;
 
+[System.Serializable]
+public partial class MyRoomState : Schema
+{
+    [Type(0, "map", typeof(MapSchema<Player>))]
+    public MapSchema<Player> players = new MapSchema<Player>();
+}
+
+[System.Serializable]
+public partial class Player : Schema
+{
+    [Type(0, "string")]
+    public string id = default(string);
+    
+    [Type(1, "number")]
+    public float x = default(float);
+    
+    [Type(2, "number")]
+    public float y = default(float);
+}
+```
+
+### Advanced Features
+
+**Room Options**
+```csharp
+Dictionary<string, object> roomOptions = new Dictionary<string, object>
+{
+    ["maxPlayers"] = 4,
+    ["gameMode"] = "battle",
+    ["mapName"] = "desert"
+};
+
+room = await client.JoinOrCreate<MyRoomState>("my_room", roomOptions);
+```
+
+**Listening to State Changes**
+```csharp
+void SetupStateListeners()
+{
+    var callbacks = Colyseus.Schema.Callbacks.Get(room);
+    
+    // Player added
+    callbacks.OnAdd(state => state.players, (key, player) => {
+        Debug.Log($"Player {key} joined the game!");
+        SpawnPlayer(key, player);
+        
+        // Listen to player changes
+        callbacks.OnChange(player, (changes) => {
+            UpdatePlayerPosition(key, player);
+        });
+    });
+    
+    // Player removed
+    callbacks.OnRemove(state => state.players, (key, player) => {
+        Debug.Log($"Player {key} left the game!");
+        DestroyPlayer(key);
+    });
+}
+```
+
+**Connection Settings**
 ```csharp
 // Local development
 string serverUrl = "ws://localhost:2567";
 
-// Production server
-string serverUrl = "ws://your-server.com:2567";
+// Production server (replace with your domain)
+string serverUrl = "ws://your-domain.com:2567";
 
 // Secure connection (recommended for production)
-string serverUrl = "wss://your-server.com:443";
+string serverUrl = "wss://your-domain.com:443";
+
+// Akash Network deployment
+string serverUrl = "ws://provider-address:2567";
 ```
+
+### Testing in Unity Editor
+
+**Unity 6000.1.0b1+ (Multiplayer Play Mode)**
+1. Enable Multiplayer Play Mode in Unity
+2. Create multiple virtual players
+3. Test multiplayer functionality without building
+
+**Older Unity Versions (ParrelSync)**
+1. Install ParrelSync from Package Manager
+2. Create cloned projects for testing
+3. Run multiple instances simultaneously
+
+### Debugging Tips
+
+**Connection Issues**
+```csharp
+// Add detailed error handling
+try 
+{
+    room = await client.JoinOrCreate<MyRoomState>("my_room");
+}
+catch (System.Exception e)
+{
+    Debug.LogError($"Connection failed: {e.Message}");
+    // Check server is running: curl http://localhost:2567/health
+    // Verify WebSocket connection: ws://localhost:2567
+}
+```
+
+**Development Mode (Prevent Timeout)**
+In your server's `app.config.ts`:
+```typescript
+initializeTransport: (options) => new WebSocketTransport({
+    pingInterval: 0, // Disable timeout during debugging
+    ...options
+})
+```
+**⚠️ Important**: Set `pingInterval` > 0 in production!
+
+### Platform-Specific Notes
+
+**WebGL**
+- Use secure WebSocket (wss://) for HTTPS sites
+- Browser security restrictions may apply
+
+**Mobile (iOS/Android)**
+- Test network permissions
+- Handle connection drops gracefully
+
+**Desktop (Windows/Mac/Linux)**
+- Full WebSocket support
+- Best performance for development
 
 ## Server Endpoints
 
-The server provides these endpoints:
+**IMPORTANT**: All endpoints use port 2567 (the WebSocket port)
 
-### WebSocket (Port 2567)
+### WebSocket Connection (Port 2567)
 - **ws://localhost:2567** - Unity client connections
 - Available rooms: `my_room`, `lobby`
 
 ### HTTP Endpoints (Port 2567)
-All HTTP endpoints are available on the same port as WebSocket (2567):
-
-- **GET http://localhost:2567/health** - Server health status
 - **GET http://localhost:2567/** - Server information
+- **GET http://localhost:2567/health** - Health check for monitoring
 - **GET http://localhost:2567/metrics** - Server metrics
-- **GET http://localhost:2567/colyseus** - Monitor interface (production: password protected)
-- **GET http://localhost:2567/playground** - Development playground (development only)
+- **GET http://localhost:2567/colyseus** - Admin monitor interface
+- **GET http://localhost:2567/playground** - Development playground (dev mode only)
 
 ### Health Check Example
 
@@ -160,7 +348,6 @@ curl http://localhost:2567/health
   "memory": { "rss": 50331648, "heapUsed": 25165824 },
   "environment": "development",
   "ports": {
-    "http": 80,
     "websocket": 2567
   }
 }
@@ -173,8 +360,7 @@ curl http://localhost:2567/health
 ```bash
 # Server Configuration
 NODE_ENV=production
-PORT=80                    # HTTP server port
-WS_PORT=2567              # WebSocket server port
+WS_PORT=2567              # Main server port (WebSocket + HTTP)
 
 # Security (Change these!)
 JWT_SECRET=your-jwt-secret-change-this
