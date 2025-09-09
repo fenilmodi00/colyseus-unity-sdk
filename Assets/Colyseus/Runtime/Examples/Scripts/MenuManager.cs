@@ -33,7 +33,7 @@ public class MenuManager : MonoBehaviour
         set => secureProtocol = !secureProtocol;
     }
 
-    public string HostAddress 
+    public string HostAddress
     {
         get
         {

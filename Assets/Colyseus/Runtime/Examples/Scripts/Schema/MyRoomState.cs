@@ -11,5 +11,8 @@ public partial class MyRoomState : Schema
 {
 	[Type(0, "map", typeof(MapSchema<Player>))]
 	public MapSchema<Player> players = new MapSchema<Player>();
+	
+	[Type(1, "number")]
+	public float playerCount = default(float);
 }
 

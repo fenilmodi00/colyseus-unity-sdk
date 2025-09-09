@@ -14,5 +14,8 @@ public partial class Player : Schema
 
 	[Type(1, "number")]
 	public float y = default(float);
+	
+	[Type(2, "string")]
+	public string playerId = default(string);
 }
 
