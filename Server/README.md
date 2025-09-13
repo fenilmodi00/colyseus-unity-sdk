@@ -6,7 +6,6 @@ A multiplayer game server built with Colyseus framework for Unity games. This se
 
 - **Colyseus Framework** - Multiplayer game server framework
 - **WebSocket Communication** - Real-time messaging on port 2567
-- **HTTP Endpoints** - Health checks and monitoring (same port as WebSocket)
 - **Room Management** - Game rooms with player state synchronization
 - **Unity Integration** - Easy connection from Unity clients
 
@@ -23,7 +22,7 @@ A multiplayer game server built with Colyseus framework for Unity games. This se
 
 - Node.js 18+
 - npm package manager
-- Docker 
+- Docker
 
 ## Local Development
 
@@ -54,7 +53,7 @@ npm run build
 ```
 
 The server will start on:
-- **WebSocket & HTTP:** port 2567 (this is the only port you need)
+- **WebSocket & HTTP:** port 2567 (single port used by both)
 - **Health checks:** http://localhost:2567/health
 
 ### Using Docker
@@ -102,7 +101,7 @@ git clone https://github.com/fenilmodi00/colyseus-unity-sdk.git
 
 **4. Example Scripts Included**
 - `MenuManager.cs` - Connection UI and settings
-- `NetworkManager.cs` - Colyseus client management  
+- `NetworkManager.cs` - Colyseus client management
 - `GameplayManager.cs` - Game scene management
 - `PlayerMovement.cs` - Synchronized player movement
 - `MyRoomState.cs` & `Player.cs` - State schemas
@@ -140,13 +139,11 @@ public class GameNetworkManager : MonoBehaviour
     {
         // Connect to your server (change URL for production)
         client = new ColyseusClient("ws://localhost:2567");
-        
-        try 
+        try
         {
             // Join or create a room
             room = await client.JoinOrCreate<MyRoomState>("my_room");
-            Debug.Log("Connected to room: " + room.Id);
-            
+            Debug.Log("Connected to room: " + room.Id)
             SetupRoomEvents();
         }
         catch (System.Exception e)
@@ -154,32 +151,27 @@ public class GameNetworkManager : MonoBehaviour
             Debug.LogError("Connection failed: " + e.Message);
         }
     }
-    
     void SetupRoomEvents()
     {
         // Room joined successfully
         room.OnJoin += () => {
             Debug.Log("Successfully joined room!");
         };
-        
         // Room left
         room.OnLeave += (code) => {
             Debug.Log($"Left room with code: {code}");
         };
-        
         // State changed
         room.OnStateChange += (state, isFirstState) => {
             if (isFirstState) {
                 Debug.Log("Initial room state received");
             }
         };
-        
         // Listen for custom messages
         room.OnMessage<object>("welcomeMessage", (message) => {
             Debug.Log("Server says: " + message);
         });
     }
-    
     public void SendPlayerPosition(Vector2 position)
     {
         room?.Send("position", new { x = position.x, y = position.y });
@@ -203,10 +195,8 @@ public partial class Player : Schema
 {
     [Type(0, "string")]
     public string id = default(string);
-    
     [Type(1, "number")]
     public float x = default(float);
-    
     [Type(2, "number")]
     public float y = default(float);
 }
@@ -231,18 +221,15 @@ room = await client.JoinOrCreate<MyRoomState>("my_room", roomOptions);
 void SetupStateListeners()
 {
     var callbacks = Colyseus.Schema.Callbacks.Get(room);
-    
     // Player added
     callbacks.OnAdd(state => state.players, (key, player) => {
         Debug.Log($"Player {key} joined the game!");
         SpawnPlayer(key, player);
-        
         // Listen to player changes
         callbacks.OnChange(player, (changes) => {
             UpdatePlayerPosition(key, player);
         });
     });
-    
     // Player removed
     callbacks.OnRemove(state => state.players, (key, player) => {
         Debug.Log($"Player {key} left the game!");
@@ -259,8 +246,8 @@ string serverUrl = "ws://localhost:2567";
 // Production server (replace with your domain)
 string serverUrl = "ws://your-domain.com:2567";
 
-// Secure connection (recommended for production)
-string serverUrl = "wss://your-domain.com:443";
+// Secure connection over HTTPS (reverse proxy terminates TLS and forwards to 2567)
+string serverUrl = "wss://your-domain.com"; // Default 443 externally → proxy to 2567 internally
 
 // Akash Network deployment
 string serverUrl = "ws://provider-address:2567";
@@ -283,7 +270,7 @@ string serverUrl = "ws://provider-address:2567";
 **Connection Issues**
 ```csharp
 // Add detailed error handling
-try 
+try
 {
     room = await client.JoinOrCreate<MyRoomState>("my_room");
 }
@@ -346,10 +333,7 @@ curl http://localhost:2567/health
   "timestamp": "2024-01-15T10:30:00.000Z",
   "uptime": 3600,
   "memory": { "rss": 50331648, "heapUsed": 25165824 },
-  "environment": "development",
-  "ports": {
-    "websocket": 2567
-  }
+    "environment": "development"
 }
 ```
 
@@ -360,7 +344,7 @@ curl http://localhost:2567/health
 ```bash
 # Server Configuration
 NODE_ENV=production
-WS_PORT=2567              # Main server port (WebSocket + HTTP)
+WS_PORT=2567              # Single port for WebSocket + HTTP
 
 # Security (Change these!)
 JWT_SECRET=your-jwt-secret-change-this
@@ -399,7 +383,7 @@ npx tsx loadtest/example.ts --room my_room --numClients 50 --endpoint ws://your-
 # Check if server is running
 npm run health-check
 
-# Manual health check (specify port 2567)
+# Manual health check (single port 2567)
 curl -f http://localhost:2567/health
 ```
 

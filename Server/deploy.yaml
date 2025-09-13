@@ -2,19 +2,15 @@
 version: "2.0"
 services:
   colyseus:
-    image: docker.io/fenildocker/colyseus-server-unity-akash:latest
+    image: docker.io/fenildocker/colyseus-server-unity-akash:0.0.2
     expose:
-      - port: 80
-        as: 80
-        to:
-          - global: true
       - port: 2567
         as: 2567
         to:
           - global: true
     env:
       - NODE_ENV=production
-      - PORT=80
+      - PORT=8080
       - WS_PORT=2567
       - JWT_SECRET=change_me_secure_value
       - AUTH_SALT=change_me_secure_value

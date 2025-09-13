@@ -14,7 +14,7 @@ import { listen } from "@colyseus/tools";
 import app from "./app.config";
 
 // Configure ports for Akash Network deployment
-const httpPort = process.env.PORT || 80;
+const httpPort = process.env.PORT || 8080;
 const wsPort = process.env.WS_PORT || 2567;
 
 console.log(`🚀 Starting Colyseus server...`);
@@ -23,5 +23,5 @@ console.log(`🌐 HTTP Port: ${httpPort}`);
 console.log(`🔗 WebSocket Port: ${wsPort}`);
 console.log(`🎮 Ready for Unity clients!`);
 
-// Create and listen on configured ports
+// Use the listen function from @colyseus/tools which properly handles the app config
 listen(app, Number(wsPort));
