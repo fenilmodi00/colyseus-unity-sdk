@@ -31,8 +31,6 @@
 - [🔧 Configuration](#-configuration)
 - [🎮 Unity Setup](#-unity-setup)
 - [📚 Examples](#-examples)
-- [📄 License](#-license)
-
 ---
 
 ## 🚀 Quick Start
@@ -284,11 +282,6 @@ HTTP error 'Insecure connection not allowed'
 
 ---
 
-## 📄 License
-
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
----
 
 ## 🙏 Acknowledgments
 
