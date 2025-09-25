@@ -1,32 +1,18 @@
-# =============================================================================
-# Docker Ignore File for Colyseus Unity SDK Server
-# Optimizes build context and reduces image size
-# =============================================================================
-
-# Node.js
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.npm
-.yarn
-
-# Build outputs (will be generated in container)
-build/
-dist/
-lib/
-*.tsbuildinfo
-
 # Development files
-.env.local
-.env.development
-.env.test
-*.log
-logs/
+node_modules
+npm-debug.log*
+.npm
+.nyc_output
+coverage
+
+# Git and version control
+.git
+.gitignore
+.github
 
 # IDE and editor files
-.vscode/
-.idea/
+.vscode
+.idea
 *.swp
 *.swo
 *~
@@ -40,62 +26,40 @@ logs/
 ehthumbs.db
 Thumbs.db
 
-# Git
-.git/
-.gitignore
-.github/
+# Logs and runtime
+logs
+*.log
+pids
+*.pid
+*.seed
+*.pid.lock
 
-# Documentation
+# Build artifacts (will be created in container)
+build/
+dist/
+lib/
+
+# Environment files (will be injected by Akash)
+.env
+.env.local
+.env.production
+
+# Documentation and examples
 README.md
-*.md
+CHANGELOG.md
 docs/
+examples/
+*.md
 
-# Testing
-coverage/
-.nyc_output/
-test/
-*.test.js
-*.test.ts
-*.spec.js
-*.spec.ts
+# Unity assets (not needed in server container)
+# Removed parent directory patterns that were interfering with build
 
-# Temporary files
-tmp/
-temp/
-.tmp/
+# Source code - Include for build
+# src/
+# tsconfig.json
+# loadtest/
 
-# Docker files (don't copy into image)
-Dockerfile*
-docker-compose*.yml
-.dockerignore
-
-# Development configuration
-nodemon.json
-.eslintrc*
-.prettierrc*
-jest.config*
-
-# Lock files (package-lock.json will be copied separately)
-yarn.lock
-
-# Environment files (will be provided at runtime)
-.env*
-
-# Backup files
-*.bak
-*.backup
-*.old
-
-# MacOS
-__MACOSX/
-
-# Windows
-desktop.ini
-
-# Linux
-*~
-
-# Runtime directories that shouldn't be in image
-uploads/
-data/
-cache/
+# Environment files - Keep in container for runtime
+.env
+.env.local
+.env.production

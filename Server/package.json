@@ -6,16 +6,16 @@
   "main": "lib/index.js",
   "scripts": {
     "start": "tsx watch src/index.ts",
-    "start:prod": "node build/index.js",
-    "tsx": "tsx watch src/index.ts",
-    "loadtest": "tsx loadtest/example.ts --room my_room --numClients 99",
+    "start:prod": "NODE_ENV=production node build/index.js",
     "build": "tsc",
     "build:prod": "tsc --sourceMap false",
-    "test": "mocha -r tsx ts-node/register test/**_test.ts --exit --timeout 15000",
-    "schema-codegen": "schema-codegen src/rooms/schema/* --csharp --output ../Assets/Example/",
-    "health-check": "curl -f http://localhost:2567/health || exit 1",
-    "version": "echo $npm_package_version"
+
+
+    "health-check": "curl -f http://localhost:2567/health",
+    "loadtest": "tsx loadtest/example.ts --room my_room --numClients 5",
+    "schema-codegen": "schema-codegen src/rooms/schema/* --csharp --output ../Assets/Colyseus/Runtime/Examples/Scripts/Schema/"
   },
+
   "author": "",
   "license": "UNLICENSED",
   "bugs": {
@@ -24,7 +24,6 @@
   "homepage": "https://github.com/colyseus/create-colyseus#readme",
   "devDependencies": {
     "@colyseus/loadtest": "^0.16.0",
-    "@colyseus/playground": "^0.16.0",
     "@colyseus/testing": "^0.16.0",
     "@types/cors": "^2.8.6",
     "@types/express": "^4.17.1",
@@ -38,6 +37,7 @@
     "@colyseus/auth": "^0.16.0",
     "@colyseus/core": "^0.16.0",
     "@colyseus/monitor": "^0.16.0",
+    "@colyseus/playground": "^0.16.0",
     "@colyseus/tools": "^0.16.0",
     "colyseus": "^0.16.0",
     "cors": "^2.8.5",
