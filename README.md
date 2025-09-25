@@ -78,7 +78,7 @@ npm start
 
 ### Option 1: Clone Repository (Recommended)
 ```
-git clone -b docker-optimized https://github.com/fenilmodi00/colyseus-unity-sdk.git
+git clone https://github.com/fenilmodi00/colyseus-unity-sdk.git
 cd colyseus-unity-sdk
 ```
 
