@@ -18,145 +18,285 @@
   </h3>
 </div>
 
+---
 
-## Quick Start Guide
+## 📋 Table of Contents
 
-## 🎯 What This Repository Provides
+- [🚀 Quick Start](#-quick-start)
+- [✨ Features](#-features)
+- [📦 Installation](#-installation)
+- [🎯 Usage](#-usage)
+- [🐳 Docker Deployment](#-docker-deployment)
+- [☁️ Akash Network](#️-akash-network)
+- [🔧 Configuration](#-configuration)
+- [🎮 Unity Setup](#-unity-setup)
+- [📚 Examples](#-examples)
+- [📄 License](#-license)
 
-- **Colyseus Unity SDK** - Complete multiplayer client for Unity
-- **Example Server** - Ready-to-deploy multiplayer server with Docker support
-- **Unity Example Project** - Functional demo with connection UI and player movement
-- **Akash Network Integration** - Decentralized hosting deployment ready
+---
 
-## ⚡ Quick Local Testing (5 minutes)
+## 🚀 Quick Start
 
-### Step 1: Start the Server
-```bash
-# Navigate to the server directory
+Get your multiplayer game running in **under 5 minutes**:
+
+### 1️⃣ Start the Server
+```
 cd Server
-
-# Install dependencies (first time only)
 npm install
-
-# Start the server
-npm run start
+npm start
 ```
+✅ Server running at `ws://localhost:2567`
 
-Server will start on:
-- **WebSocket**: `ws://localhost:2567` (for Unity connections)
-- **Health Check**: `http://localhost:2567/health`
-- **Monitor**: `http://localhost:2567/colyseus`
+### 2️⃣ Open Unity
+1. Open the project in **Unity 2022.3+**
+2. Load `Assets/Colyseus/Runtime/Examples/Scenes/Menu.unity`
+3. Click **Play** → Use default settings → Click **Play**
 
-### Step 2: Test Unity Connection
+### 3️⃣ Test Multiplayer
+- Open multiple Unity Editor windows
+- Connect and see synchronized movement!
 
-1. **Open Unity Project**
-   - Open this folder in Unity 6 (or Unity 2022.3+)
-   - Unity will import the project automatically
+> **🎉 That's it!** You now have a working multiplayer game.
 
-2. **Load the Menu Scene**
-   - In Project window: `Assets → Colyseus → Runtime → Examples → Scenes → Menu`
-   - Double-click `Menu.unity` to load it
+---
 
-3. **Test Connection**
-   - Click Play button in Unity
-   - Menu scene should show connection UI
-   - Default settings: `localhost:2567`
-   - Click "Connect" or "Play" to test
+## ✨ Features
 
-4. **Verify Connection**
-   - Check Unity Console for connection logs
-   - Server terminal should show "Client connected"
-   - Monitor interface: `http://localhost:2567/colyseus`
+| Feature | Description |
+|---------|-------------|
+| 🔄 **Real-time Sync** | WebSocket-based state synchronization |
+| 🎮 **Unity Ready** | Pre-built Unity scenes and scripts |
+| 🐳 **Docker Optimized** | Single-command deployment |
+| ☁️ **Akash Compatible** | Decentralized cloud deployment |
+| 🔒 **Production Ready** | Health checks, monitoring, logging |
+| 📱 **Cross-Platform** | WebGL, Mobile, Desktop support |
+| ⚡ **Low Latency** | Optimized for real-time gaming |
 
-## 🐳 Docker Testing
+---
 
-```bash
-# Build and run with Docker
-cd Server
-docker-compose up --build
+## 📦 Installation
 
-# Test connection
-curl http://localhost:2567/health
+### Option 1: Clone Repository (Recommended)
 ```
-
-## 🌐 Deploy to Akash Network
-
-See [Server/README.md](Server/README.md) for detailed Akash deployment instructions.
-
-## 📁 Project Structure
-
-```
-├── Assets/Colyseus/          # Unity SDK
-│   ├── Runtime/
-│   │   ├── Examples/          # Demo scenes and scripts
-│   │   │   ├── Scenes/        # Menu.unity, Game.unity
-│   │   │   └── Scripts/       # Connection scripts
-│   │   └── Colyseus/          # Core SDK
-├── Server/                    # Multiplayer server
-│   ├── src/                   # Server source code
-│   ├── Dockerfile             # Container config
-│   └── README.md              # Deployment guide
-```
-
-## 🛠️ Integration into Your Project
-
-### Option 1: Copy SDK Folder
-```bash
-# Copy the SDK into your Unity project
-cp -r Assets/Colyseus /path/to/your/project/Assets/
+git clone -b docker-optimized https://github.com/fenilmodi00/colyseus-unity-sdk.git
+cd colyseus-unity-sdk
 ```
 
 ### Option 2: Unity Package Manager
-1. Copy the `package.json` from `Assets/Colyseus/`
-2. Add via Package Manager → Add package from disk
-3. Select the `package.json` file
+1. Open Unity → **Window** → **Package Manager**
+2. Click **+** → **Add package from git URL**
+3. Enter: `https://github.com/fenilmodi00/colyseus-unity-sdk.git`
 
-### Basic Usage
-```csharp
+---
+
+## 🎯 Usage
+
+### Basic Connection
+```
 using Colyseus;
 
 // Connect to server
 ColyseusClient client = new ColyseusClient("ws://localhost:2567");
-ColyseusRoom room = await client.JoinOrCreate("my_room");
 
-// Send message
-room.Send("playerMove", new { x = 10, y = 5 });
+// Join or create room
+ColyseusRoom<MyRoomState> room = await client.JoinOrCreate<MyRoomState>("my_room");
+
+// Listen for state changes
+room.OnStateChange += (state, isFirstState) => {
+    Debug.Log("Room state updated!");
+};
+
+// Send player position
+room.Send("position", new { x = 10, y = 5 });
 ```
 
-## 🔧 Troubleshooting
+### Connection Presets
 
-### "Connection Failed"
-- ✅ Ensure server is running: `npm run start` in Server folder
-- ✅ Check server logs for errors
-- ✅ Verify Unity uses correct address: `localhost:2567`
-- ✅ Test health endpoint: `curl http://localhost:2567/health`
+| Environment | Host | Port | Secure |
+|-------------|------|------|--------|
+| **Local Dev** | `localhost` | `2567` | `false` |
+| **Akash Network** | `provider.akash.com` | `30986` | `false` |
+| **Production** | `yourdomain.com` | `443` | `true` |
 
-### "Scene Only Shows Camera"
-- ✅ Load correct scene: `Assets/Colyseus/Runtime/Examples/Scenes/Menu.unity`
-- ✅ Click Play button in Unity Editor
-- ✅ Check Unity Console for script errors
+---
 
-### "Endpoints Not Working"
-- ✅ All endpoints use port 2567 (NOT port 80)
-- ✅ Health: `http://localhost:2567/health`
-- ✅ Monitor: `http://localhost:2567/colyseus`
-- ✅ Server info: `http://localhost:2567/`
+## 🐳 Docker Deployment
 
-## 📖 Documentation
+### Local Docker
+```
+cd Server
+docker build -t colyseus-unity .
+docker run -p 2567:2567 colyseus-unity
+```
 
-- [Server Deployment Guide](Server/README.md)
-- [Unity Integration Guide](Assets/Colyseus/Documentation~/GettingStarted.md)
-- [Official Colyseus Docs](https://docs.colyseus.io/)
+### Docker Compose
+```
+docker-compose up -d
+```
 
-## 🎮 Platform Support
+### Health Check
+```
+curl http://localhost:2567/health
+```
 
-- ✅ WebGL
-- ✅ iOS  
-- ✅ Android
-- ✅ macOS
-- ✅ Windows
-- ✅ Linux
+---
 
-## License
+## ☁️ Akash Network
 
-MIT
+Deploy to decentralized cloud using console.akash.network:
+
+### 1️⃣ Deploy via Console
+1. Go to [console.akash.network](https://console.akash.network)
+2. Click "Deploy Now"
+3. Copy the entire content of `Server/deploy.yaml`
+4. Paste into the SDL (Service Definition Language) section
+6. Click "Create Deployment"
+
+### 2️⃣ Set Environment Variables
+When prompted, set these environment variables with secure values:
+- `JWT_SECRET`: A strong, random string (32+ characters)
+- `COLYSEUS_MONITOR_PASSWORD`: A secure password for admin access
+
+### 3️⃣ Get Connection Details
+After deployment:
+1. Wait for the lease to be created
+2. Find your provider URL (e.g., `provider.europlots.com`)
+3. Note the external port assigned (e.g., `30986`)
+
+### ⚙️ Unity Configuration for Akash
+Update your Unity client connection:
+```
+// Use your provider URL and external port
+private static string hostname = "your-provider-url.com";  // e.g., provider.europlots.com
+private static string port = "your-external-port";        // e.g., 30986 (NOT 2567)
+private static bool secureProtocol = false;               // Use false for HTTP
+```
+
+
+
+> **📝 Important:** Enable **"Allow downloads over HTTP"** in Unity Player Settings
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+```
+# Server/.env
+NODE_ENV=production
+WS_PORT=2567
+JWT_SECRET=your-secure-secret
+COLYSEUS_MONITOR_PASSWORD=your-admin-password
+```
+
+### Unity Project Settings
+1. **Edit** → **Project Settings** → **Player**
+2. **Other Settings** → **Configuration**
+3. Set **"Allow downloads over HTTP"** → **Always allow**
+
+---
+
+## 🎮 Unity Setup
+
+### Scene Setup
+1. Add both scenes to **Build Settings**:
+   - `Assets/Colyseus/Runtime/Examples/Scenes/Menu.unity`
+   - `Assets/Colyseus/Runtime/Examples/Scenes/Game.unity`
+
+### Scripts Included
+- **`MenuManager.cs`** - Connection UI and settings
+- **`NetworkManager.cs`** - Colyseus client management
+- **`PlayerMovement.cs`** - Synchronized player movement
+- **`MyRoomState.cs`** - Room state schema
+
+### Testing Multiplayer
+- **Unity 6+**: Use **Multiplayer Play Mode**
+- **Older Unity**: Use [ParrelSync](https://github.com/VeriorPies/ParrelSync) to clone project
+
+---
+
+## 📚 Examples
+
+### Custom Room Logic
+```
+// Server/src/rooms/MyRoom.ts
+export class MyRoom extends Room<MyRoomState> {
+  onCreate(options: any) {
+    this.setState(new MyRoomState());
+
+    this.onMessage("position", (client, data) => {
+      const player = this.state.players.get(client.sessionId);
+      player.x = data.x;
+      player.y = data.y;
+    });
+  }
+}
+```
+
+### Unity State Handling
+```
+void SetupStateListeners() {
+    var callbacks = Colyseus.Schema.Callbacks.Get(room);
+
+    // Player joined
+    callbacks.OnAdd(state => state.players, (key, player) => {
+        SpawnPlayer(key, player);
+    });
+
+    // Player moved
+    callbacks.OnChange(player, (changes) => {
+        UpdatePlayerPosition(player);
+    });
+}
+```
+
+---
+
+## 🚨 Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| **Connection Failed** | Check server is running: `curl http://localhost:2567/health` |
+| **Unity HTTP Error** | Enable "Allow HTTP" in Player Settings |
+| **Akash Port Issues** | Use external port from lease (e.g., `30986`, not `2567`) |
+| **Docker Build Fails** | Ensure Docker daemon is running |
+
+### Common Connection Errors
+```
+WebSocketException: Unable to connect
+```
+**Fix:** Verify server URL and ensure server is running
+
+```
+HTTP error 'Insecure connection not allowed'
+```
+**Fix:** Enable HTTP downloads in Unity Player Settings
+
+---
+
+## 📊 Project Stats
+
+- **Unity Version:** 2022.3+
+- **Colyseus Version:** 0.16
+- **Docker Image Size:** ~120MB
+- **Deployment Time:** < 5 minutes
+- **Platform Support:** Windows, macOS, Linux, WebGL, Mobile
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Colyseus](https://colyseus.io/) - Multiplayer framework
+- [Unity Technologies](https://unity.com/) - Game engine
+- [Akash Network](https://akash.network/) - Decentralized cloud
+- [Docker](https://www.docker.com/) - Containerization
+
+---
+
+
