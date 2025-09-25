@@ -1,6 +1,6 @@
 # =============================================================================
 # Multi-stage Dockerfile for Colyseus Unity SDK Server
-# Optimized for Akash Network deployment with minimal size and enhanced security
+# Optimized for Akash Network deployment
 # =============================================================================
 
 # -----------------------------------------------------------------------------
@@ -8,7 +8,7 @@
 # -----------------------------------------------------------------------------
 FROM node:20-alpine AS builder
 
-# Install build dependencies
+# Install build dependencies (minimal set for faster builds)
 RUN apk add --no-cache python3 make g++ git
 
 # Set working directory
@@ -18,7 +18,7 @@ WORKDIR /app
 COPY package*.json tsconfig.json ./
 
 # Install ALL dependencies (including devDependencies for build)
-RUN npm ci --include=dev
+RUN npm ci --include=dev --prefer-offline
 
 # Copy source code
 COPY src/ ./src/
@@ -30,7 +30,7 @@ RUN npm run build
 # Install only production dependencies in clean directory
 RUN mkdir /prod && cd /prod && \
     cp /app/package*.json . && \
-    npm ci --omit=dev --cache /tmp/.npm
+    npm ci --omit=dev --cache /tmp/.npm --prefer-offline
 
 # -----------------------------------------------------------------------------
 # Production Stage - Minimal runtime image
@@ -41,7 +41,8 @@ FROM node:20-alpine AS production
 RUN apk add --no-cache \
     tini \
     curl \
-    ca-certificates && \
+    ca-certificates \
+    dumb-init && \
     rm -rf /var/cache/apk/* && \
     adduser -D -s /bin/sh -h /app colyseus
 
@@ -54,22 +55,24 @@ COPY --from=builder /app/package*.json ./
 
 # Copy built application
 COPY --from=builder /app/build ./build
+
+# Copy loadtest directory for performance testing
 COPY --from=builder /app/loadtest ./loadtest
 
 # Create logs directory and set ownership
-RUN mkdir -p logs && \
+RUN mkdir -p logs tmp && \
     chown -R colyseus:colyseus /app
 
 # Switch to non-root user
 USER colyseus
 
-# Expose ports for Akash Network
-EXPOSE 80 2567
+# **CRITICAL FIX**: Only expose the WebSocket port that Akash will map
+EXPOSE 2567
 
 # Health check - optimized for Akash Network container orchestration
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-    CMD curl -f http://localhost:80/health || exit 1
+    CMD curl -f http://localhost:2567/health || exit 1
 
-# Use tini for proper signal handling
-ENTRYPOINT ["tini", "--"]
+# Use dumb-init for proper signal handling in containers
+ENTRYPOINT ["dumb-init", "--"]
 CMD ["node", "build/index.js"]

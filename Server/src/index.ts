@@ -1,27 +1,18 @@
 /**
  * Colyseus Unity SDK Server - Akash Network Optimized
- *
- * IMPORTANT:
- * ---------
- * Configured for deployment on Akash Network with HTTP/TCP port support
- *
- * If you're self-hosting (without Arena), you can manually instantiate a
- * Colyseus Server as documented here: 👉 https://docs.colyseus.io/server/api/#constructor-options
+ * Single port configuration for Akash Network compatibility
  */
 import { listen } from "@colyseus/tools";
-
-// Import arena config
 import app from "./app.config";
 
-// Configure ports for Akash Network deployment
-const httpPort = process.env.PORT || 8080;
-const wsPort = process.env.WS_PORT || 2567;
+// Akash Network: Use single port for both HTTP and WebSocket
+const port = Number(process.env.WS_PORT) || 2567;
 
-console.log(`🚀 Starting Colyseus server...`);
+console.log(`🚀 Starting Colyseus server for Akash Network...`);
 console.log(`📡 Environment: ${process.env.NODE_ENV || 'development'}`);
-console.log(`🌐 HTTP Port: ${httpPort}`);
-console.log(`🔗 WebSocket Port: ${wsPort}`);
+console.log(`🌐 Server Port: ${port} (HTTP + WebSocket)`);
 console.log(`🎮 Ready for Unity clients!`);
+console.log(`📊 Health Check: http://localhost:${port}/health`);
 
-// Use the listen function from @colyseus/tools which properly handles the app config
-listen(app, Number(wsPort));
+// Start server on single port (Akash compatible)
+listen(app, port);

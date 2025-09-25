@@ -2,7 +2,7 @@
 version: "2.0"
 services:
   colyseus:
-    image: docker.io/fenildocker/colyseus-server-unity-akash:0.0.2
+    image: fenildocker/colyseus-server-unity-akash:0.0.3
     expose:
       - port: 2567
         as: 2567
@@ -10,23 +10,21 @@ services:
           - global: true
     env:
       - NODE_ENV=production
-      - PORT=8080
+      - PORT=2567
       - WS_PORT=2567
-      - JWT_SECRET=change_me_secure_value
-      - AUTH_SALT=change_me_secure_value
-      - SESSION_SECRET=change_me_secure_value
-      - COLYSEUS_MONITOR_PASSWORD=change_me_monitor_password
+      - JWT_SECRET=${JWT_SECRET}
+      - COLYSEUS_MONITOR_PASSWORD=${COLYSEUS_MONITOR_PASSWORD}
       - LOG_LEVEL=info
 profiles:
   compute:
     colyseus:
       resources:
         cpu:
-          units: 0.5
+          units: 1.0
         memory:
-          size: 512Mi
+          size: 1024Mi
         storage:
-          - size: 1Gi
+          - size: 2Gi
   placement:
     dcloud:
       pricing:
